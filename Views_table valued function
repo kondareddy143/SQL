@@ -1,0 +1,75 @@
+ 
+ --- 4 part name 
+--ipaddress/servername.DATABASENAME.SCHEMA_NAME.TABLE_NAME
+select * from   test.dbo.emp
+
+go
+
+------system views----
+select * From sys.all_columns
+select type,type_desc From sys.all_objects group by type,type_desc
+
+type	type_desc
+FN	SQL_SCALAR_FUNCTION
+SO	SEQUENCE_OBJECT
+IF	SQL_INLINE_TABLE_VALUED_FUNCTION
+C 	CHECK_CONSTRAINT
+SQ	SERVICE_QUEUE
+F 	FOREIGN_KEY_CONSTRAINT
+U 	USER_TABLE
+FS	CLR_SCALAR_FUNCTION
+D 	DEFAULT_CONSTRAINT
+PK	PRIMARY_KEY_CONSTRAINT
+V 	VIEW
+AF	AGGREGATE_FUNCTION
+S 	SYSTEM_TABLE
+IT	INTERNAL_TABLE
+P 	SQL_STORED_PROCEDURE
+X 	EXTENDED_STORED_PROCEDURE
+TF	SQL_TABLE_VALUED_FUNCTION
+PC	CLR_STORED_PROCEDURE
+
+
+select * From sys.all_parameters
+select * From sys.all_sql_modules
+select * From sys.all_views
+select * From sys.sysaltfiles
+
+----views----
+
+select * from emp where DEPTNO=10
+--there is no column level security in table
+--so we go with views
+go
+create view uv_get_empdetails2
+as
+select empno,ename,job, mgr,HIREDATE,DEPTNO from emp where DEPTNO=20
+go
+select * from uv_get_empdetails2
+select * from emp
+select * from uv_get_empdetails
+
+					----dis advantages of views--
+--we can not pass the parameters to the view 
+-- so we can go with table valied function
+--table valied function accepts paremeters 
+go
+
+create function ufn_get_emp(@no int)
+returns table
+as
+return( select empno,ename,job, mgr,HIREDATE,DEPTNO from emp where DEPTNO=@no)
+go
+
+--execute the function
+select * from  dbo.ufn_get_emp(20)
+ 
+ ------ MULTI VALUE FUNCTION----
+ alter FUNCTION TFN_GETEMP(@NO INT)
+ RETURNS @EMP TABLE(EMPNO INT,NAME VARCHAR(100),SAL MONEY, COM MONEY,DE INT)
+ AS
+ BEGIN
+ insert into @EMP
+ SELECT EMPNO,ENAME,SAL,COMM,DEPTNO FROM EMP WHERE DEPTNO=@NO
+ RETURN
+ END
